@@ -1,0 +1,334 @@
+data<- read.csv("salary_data_original.csv")
+str(data)
+
+summary(data$JOB_TITLE_SUBGROUP)
+summary(data$JOB_TITLE)
+
+library(lubridate)
+library(plyr)
+library(ggplot2)
+
+options(scipen=999)
+
+data$DECISION_DATE <- mdy(data$DECISION_DATE)
+data$DECISION_DATE <- as.Date(data$DECISION_DATE)
+df <- data.frame(date = data$DECISION_DATE,
+                 year = as.numeric(format(data$DECISION_DATE, format = "%Y")),
+                 month = as.numeric(format(data$DECISION_DATE, format = "%m")),
+                 day = as.numeric(format(data$DECISION_DATE, format = "%d")))
+data$year <- df$year
+
+data_scientist <- data[which(data$JOB_TITLE_SUBGROUP=="data scientist"),]
+
+boxplot(data_scientist$PAID_WAGE_PER_YEAR)
+
+head(data_scientist)
+
+summary(data_scientist$PAID_WAGE_PER_YEAR)
+ Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  39080   88250  110000  108000  127800  230000 
+
+
+mean(data_scientist$PAID_WAGE_PER_YEAR)
+[1] 108021
+
+median(data_scientist$PAID_WAGE_PER_YEAR)
+[1] 110000
+
+sd(data_scientist$PAID_WAGE_PER_YEAR)
+[1] 28883.06
+
+
+
+data_analyst <- data[which(data$JOB_TITLE_SUBGROUP=="data analyst"),]
+
+head(data_analyst)
+
+mean(data_analyst$PAID_WAGE_PER_YEAR)
+[1] 70030.08
+
+sd(data_analyst$PAID_WAGE_PER_YEAR)
+[1] 21045.3
+
+summary(data_analyst$PAID_WAGE_PER_YEAR)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  29410   60000   65000   70030   78000  746300 
+
+paid_wage <- t.test(data_scientist$PAID_WAGE_PER_YEAR,data_analyst$PAID_WAGE_PER_YEAR)
+str(paid_wage)
+
+paid_wage$p.value
+0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110129
+
+paid_wage$conf.int
+[1] 36241.87 39740.05
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage$estimate
+f x mean of y 
+108021.04  70030.08 
+
+data_scientist_NY <- data_scientist[which(data_scientist$WORK_CITY=="NEW YORK"),]
+data_scientist_SF <- data_scientist[which(data_scientist$WORK_CITY=="SAN FRANCISCO"),]
+
+paid_wage_ds <- t.test(data_scientist_NY$PAID_WAGE_PER_YEAR,data_scientist_SF$PAID_WAGE_PER_YEAR)
+
+paid_wage_ds$p.value
+[1] 0.003648021
+
+paid_wage_ds$conf.int
+[1] -15738.46  -3104.65
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_ds$estimate
+mean of x mean of y 
+ 105429.0  114850.6 
+
+data_analyst_NY <- data_analyst[which(data_analyst$WORK_CITY=="NEW YORK"),]
+data_analyst_SF <- data_analyst[which(data_analyst$WORK_CITY=="SAN FRANCISCO"),]
+
+paid_wage_da <- t.test(data_analyst_NY$PAID_WAGE_PER_YEAR,data_analyst_SF$PAID_WAGE_PER_YEAR)
+
+paid_wage_da$p.value
+0.0000000004565538
+
+paid_wage_da$conf.int
+[1] -17776.75  -9488.13
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_da$estimate
+mean of x mean of y 
+ 72318.66  85951.10 
+
+data_scientist_GC <- data_scientist[which(data_scientist$VISA_CLASS=="greencard"),]
+data_scientist_H1 <- data_scientist[which(data_scientist$VISA_CLASS=="H-1B"),]
+
+paid_wage_ds_vc <- t.test(data_scientist_GC$PAID_WAGE_PER_YEAR,data_scientist_H1$PAID_WAGE_PER_YEAR)
+
+paid_wage_ds_vc$p.value
+0.04619683
+
+paid_wage_ds_vc$conf.int
+[1]   157.0577 17780.7669
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_ds_vc$estimate
+mean of x mean of y 
+ 116507.8  107538.8 
+
+data_analyst_GC <- data_analyst[which(data_analyst$VISA_CLASS=="greencard"),]
+data_analyst_H1 <- data_analyst[which(data_analyst$VISA_CLASS=="H-1B"),]
+
+paid_wage_da_vc <- t.test(data_analyst_GC$PAID_WAGE_PER_YEAR,data_analyst_H1$PAID_WAGE_PER_YEAR)
+
+paid_wage_da_vc$p.value
+0.00025826
+
+paid_wage_da_vc$conf.int
+[1]  9926.884 31969.217
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_da_vc$estimate
+mean of x mean of y 
+ 90197.10  69249.05 
+
+data_scientist_ca <- data_scientist[which(data_scientist$WORK_STATE=="CA"),]
+data_scientist_tx <- data_scientist[which(data_scientist$WORK_STATE=="TX"),]
+
+paid_wage_ds_ws <- t.test(data_scientist_ca$PAID_WAGE_PER_YEAR,data_scientist_tx$PAID_WAGE_PER_YEAR)
+
+paid_wage_ds_ws$p.value
+ 0.000000006574831
+
+paid_wage_ds_ws$conf.int
+[1] 20330.53 36412.07
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_ds_ws$estimate
+mean of x mean of y 
+ 117498.2   89126.9 
+
+data_analyst_ca <- data_analyst[which(data_analyst$WORK_STATE=="CA"),]
+data_analyst_tx <- data_analyst[which(data_analyst$WORK_STATE=="TX"),]
+
+paid_wage_da_ws <- t.test(data_analyst_ca$PAID_WAGE_PER_YEAR,data_analyst_tx$PAID_WAGE_PER_YEAR)
+
+paid_wage_da_ws$p.value
+0.000000000000000000000000000003476277
+
+paid_wage_da_ws$conf.int
+[1] 11632.42 16268.10
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_da_ws$estimate
+mean of x mean of y 
+ 78766.04  64815.78
+
+data_scientist_ft <- data_scientist[which(data_scientist$FULL_TIME_POSITION_Y_N=="y"),]
+data_scientist_nft <- data_scientist[which(data_scientist$FULL_TIME_POSITION_Y_N=="n"),]
+
+paid_wage_ds_ftp <- t.test(data_scientist_ft$PAID_WAGE_PER_YEAR,data_scientist_nft$PAID_WAGE_PER_YEAR)
+
+paid_wage_ds_ftp$p.value
+0.7715878
+
+paid_wage_ds_ftp$conf.int
+[1] -37812.45  30181.71
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_ds_ftp$estimate
+mean of x mean of y 
+ 107651.8  111467.2 
+
+data_analyst_ft <- data_analyst[which(data_analyst$FULL_TIME_POSITION_Y_N=="y"),]
+data_analyst_nft <- data_analyst[which(data_analyst$FULL_TIME_POSITION_Y_N=="n"),]
+
+paid_wage_da_ftp <- t.test(data_analyst_ft$PAID_WAGE_PER_YEAR,data_analyst_nft$PAID_WAGE_PER_YEAR)
+paid_wage_da_ftp$p.value
+0.2251976
+
+paid_wage_da_ftp$conf.int
+[1] -3008.53 12430.12
+attr(,"conf.level")
+[1] 0.95
+
+paid_wage_da_ftp$estimate
+mean of x mean of y 
+ 69407.31  64696.51 
+
+par(mfrow=c(2,1))
+
+data_employer_paid_ds <- data_scientist[c(5,24)]
+attach(data_employer_paid_ds)
+data_employer_paid_ds_sort <- data_employer_paid_ds[order(-PAID_WAGE_PER_YEAR),] 
+detach(data_employer_paid_ds)
+
+data_employer_paid_ds_sort$percent<- prop.table(data_employer_paid_ds_sort$PAID_WAGE_PER_YEAR)
+top_data_employer_ds <- head(data_employer_paid_ds_sort,10)
+dotchart(top_data_employer_ds$PAID_WAGE_PER_YEAR,top_data_employer_ds$EMPLOYER_NAME,cex=.5,
+  	main="TOP DATA SCIENTIST PAID EMPLOYER", 
+   xlab="SALARY")
+
+data_employer_paid_da <- data_analyst[c(5,24)]
+attach(data_employer_paid_da)
+data_employer_paid_da_sort <- data_employer_paid_da[order(-PAID_WAGE_PER_YEAR),] 
+detach(data_employer_paid_da)
+
+data_employer_paid_da_sort$percent<- prop.table(data_employer_paid_da_sort$PAID_WAGE_PER_YEAR)
+top_data_employer_da <- head(data_employer_paid_da_sort,10)
+dotchart(top_data_employer_da$PAID_WAGE_PER_YEAR,top_data_employer_da$EMPLOYER_NAME,cex=.5,
+  	main="TOP DATA ANALYST PAID EMPLOYER", 
+   xlab="SALARY")
+
+
+
+data_dd_ds <- ddply(data_scientist,c("year"),summarise,
+	         MEDIAN_SALARY=median(PAID_WAGE_PER_YEAR))
+
+fit1 <- lm(MEDIAN_SALARY~year, data=data_dd_ds)
+
+summary_fit1 <- summary(fit1)
+str(summary_fit1)
+confint(fit1)
+              2.5 %       97.5 %
+(Intercept) -6935828.252 11183828.252
+year           -5500.659     3500.659
+
+coefficients(fit1)
+rcept)        year 
+    2124000       -1000 
+
+plot(data_dd_ds$year,data_dd_ds$MEDIAN_SALARY)
+abline(fit1)
+
+data_dd_da <- ddply(data_analyst,c("year"),summarise,
+	         MEDIAN_SALARY=median(PAID_WAGE_PER_YEAR))
+
+fit2 <- lm(MEDIAN_SALARY~year, data=data_dd_da)
+
+summary_fit2 <- summary(fit2)
+str(summary_fit2)
+confint(fit2)
+               2.5 %      97.5 %
+(Intercept) -2572923.6134 1668409.413
+year            -796.3853    1310.585
+
+coefficients(fit2)
+(Intercept)        year 
+  -452257.1       257.1 
+
+plot(data_dd_da$year,data_dd_da$MEDIAN_SALARY)
+abline(fit2)
+
+# Prediction
+
+par(mfrow=c(1,2))
+
+new_ds <- data.frame(year=c(max(data_dd_ds$year)+1,max(data_dd_ds$year)+2,max(data_dd_ds$year)+3))
+pred.w.clim <- predict(fit1, new_ds, interval="confidence")
+matplot(new_ds$year,pred.w.clim,
+	main='Forecast Salary of DS',
+	lty=c(1,2,2),type="l",lwd=c(1.5,1,1),
+	ylab="Salary",
+	col=c("cadetblue4","chocolate4","chocolate4"),
+	xlab="Year",
+	xaxt='n',
+	cex=0.8,
+	cex.axis=0.8)
+grid(lty=6,col="cornsilk2")
+axis(side=1,at=new_ds$year,labels=(c("2016","2017","2018")))
+
+new_da <- data.frame(year=c(max(data_dd_da$year)+1,max(data_dd_da$year)+2,max(data_dd_da$year)+3))
+pred.w.clim <- predict(fit2, new_da, interval="confidence")
+matplot(new_da$year,pred.w.clim,
+	main='Forecast Salary of DA',
+	lty=c(1,2,2),type="l",lwd=c(1.5,1,1),
+	ylab="Salary",
+	col=c("cadetblue4","chocolate4","chocolate4"),
+	xlab="Year",
+	xaxt='n',
+	cex=0.8,
+	cex.axis=0.8)
+grid(lty=6,col="cornsilk2")
+axis(side=1,at=new_ds$year,labels=(c("2016","2017","2018")))
+
+install.packages("lsr")
+library(lsr)
+ds_salary <- rnorm(data_scientist$PAID_WAGE_PER_YEAR)
+da_salary <- rnorm(data_analyst$PAID_WAGE_PER_YEAR)
+
+cohensD(ds_salary,da_salary)
+[1] 0.06272147
+
+par(mfrow=c(1,2))
+
+ggplot(fit1,aes(year, MEDIAN_SALARY))+
+geom_point(aes(clor=MEDIAN_SALARY))+
+geom_smooth(method="lm")+
+coord_cartesian()+
+scale_color_gradient()+
+theme_bw()
+
+ggplot(fit2,aes(year, MEDIAN_SALARY))+
+geom_point(aes(clor=MEDIAN_SALARY))+
+geom_smooth(method="lm")+
+coord_cartesian()+
+scale_color_gradient()+
+theme_bw()
+
+********
+summary(data$COUNTRY_OF_CITIZENSHIP)
+india <- data[which(data$COUNTRY_OF_CITIZENSHIP=="INDIA"),]
+china <- data[which(data$COUNTRY_OF_CITIZENSHIP=="CHINA"),]
+
+t.test(india$PAID_WAGE_PER_YEAR,china$PAID_WAGE_PER_YEAR)
+
+barplot(data$COUNTRY_OF_CITIZENSHIP)
